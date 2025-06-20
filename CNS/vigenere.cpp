@@ -1,80 +1,61 @@
 #include <iostream>
 #include <string>
 #include <cctype>
+
 using namespace std;
 
-string generateKey(const string &text, const string &key)
-{
-    string newKey;
-    int keyIndex = 0;
-    for (char ch : text)
-    {
-        if (isalpha(ch))
-        {
-            newKey += toupper(key[keyIndex % key.length()]);
-            keyIndex++;
-        }
-    }
-    return newKey;
+char shift(char m, char k, int dir) {
+    int a = tolower(m) - 'a';
+    int b = tolower(k) - 'a';
+    return 'a' + (a + dir * b + 26) % 26;
 }
 
-string vigenereEncrypt(const string &text, const string &key)
-{
-    string cipherText;
-    string newKey = generateKey(text, key);
-    int keyIndex = 0;
+int main() {
+    int ch;
 
-    for (char ch : text)
-    {
-        if (isalpha(ch))
-        {
-            char base = isupper(ch) ? 'A' : 'a';
-            cipherText += ((toupper(ch) - 'A' + (newKey[keyIndex] - 'A')) % 26) + base;
-            keyIndex++;
-        }
-        else
-        {
-            cipherText += ch;
+    while (true) {
+        cout << "Vigenère Cipher\n1 - Encrypt\n2 - Decrypt\n3 - Quit\nChoice: ";
+        cin >> ch;
+        cin.ignore();  // Clear newline from buffer
+
+        if (ch == 1 || ch == 2) {
+            string msg, key, res;
+            int mode = (ch == 1) ? 1 : -1;
+
+            cout << "Enter message: ";
+            getline(cin, msg);
+
+            cout << "Enter key: ";
+            getline(cin, key);
+
+            int klen = key.length();
+            int k = 0;
+
+            for (char c : msg) {
+                if (isalpha(c)) {
+                    char shifted = shift(c, key[k % klen], mode);
+                    // Preserve original case
+                    if (isupper(c))
+                        shifted = toupper(shifted);
+                    res += shifted;
+                    k++;
+                } else {
+                    res += c; // Leave non-alphabet characters unchanged
+                }
+            }
+
+            if (mode == 1)
+                cout << "Encrypted message: " << res << "\n\n";
+            else
+                cout << "Decrypted message: " << res << "\n\n";
+        } 
+        else if (ch == 3) {
+            break;
+        } 
+        else {
+            cout << "Invalid choice!\n";
         }
     }
-    return cipherText;
-}
-
-string vigenereDecrypt(const string &cipherText, const string &key)
-{
-    string plainText;
-    string newKey = generateKey(cipherText, key);
-    int keyIndex = 0;
-
-    for (char ch : cipherText)
-    {
-        if (isalpha(ch))
-        {
-            char base = isupper(ch) ? 'A' : 'a';
-            plainText += ((toupper(ch) - 'A' - (newKey[keyIndex] - 'A') + 26) % 26) + base;
-            keyIndex++;
-        }
-        else
-        {
-            plainText += ch;
-        }
-    }
-    return plainText;
-}
-
-int main()
-{
-    string text, key;
-    cout << "Enter the text: ";
-    getline(cin, text);
-    cout << "Enter the key: ";
-    cin >> key;
-
-    string encrypted = vigenereEncrypt(text, key);
-    cout << "Encrypted Text: " << encrypted << endl;
-
-    string decrypted = vigenereDecrypt(encrypted, key);
-    cout << "Decrypted Text: " << decrypted << endl;
 
     return 0;
 }
